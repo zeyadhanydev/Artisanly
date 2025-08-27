@@ -22,6 +22,8 @@ console.log(image)
    // const imageBlob = await imageResponse.blob();
 
    // Create a direct binary POST request to the Modal API endpoint
+   // TODO later will send to server an image to remove bg and use huggingface model to remove bg
+   // https://huggingface.co/briaai/RMBG-1.4
    const response = await fetch(`${process.env.REMOVE_BG_MODEL}?image=${image}`, {
      method: 'GET',
      headers: {
@@ -42,11 +44,17 @@ console.log(image)
 
   const img = `data:image/png;base64,${base64}`
   return c.json({
-    data: img
+    data: img,
+    clientSide: false
   });
 } catch (err) {
   console.error('Error generating image:', err);
-  return c.json({ error: 'Error generating image' }, 500);
+  // Fallback to client-side processing if server-side fails
+  return c.json({
+    error: 'Error processing image on server, try client-side processing',
+    fallbackToClient: true,
+    originalImage: image
+  }, 500);
 }
   })
   .post('/generate-image',

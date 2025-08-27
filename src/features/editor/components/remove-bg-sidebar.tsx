@@ -1,10 +1,10 @@
 "use client";
-import { AlertTriangle, Loader } from "lucide-react";
+import { AlertTriangle, Loader, ToggleLeft, ToggleRight } from "lucide-react";
 import Image from "next/image";
-import { FaSpinner } from "react-icons/fa";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useRemoveBgImage } from "@/features/ai/api/use-remove-bg";
+import { useRemoveBackground } from "@/features/ai/hooks/use-remove-background";
 import { ToolSidebarHeader } from "@/features/editor/components/tool-sidebar-header";
 import type { ActiveTool, Editor } from "@/features/editor/types";
 import { cn } from "@/lib/utils";
@@ -24,23 +24,33 @@ export const RemoveBgSidebar = ({
 	const selectedObject = editor?.selectedObjects[0];
 	// @ts-expect-error _originalElement not recognized by fabric types
 	const imageSrc = selectedObject?._originalElement?.currentSrc;
-	const mutation = useRemoveBgImage();
+	const [useClientSide, setUseClientSide] = useState(true);
+	const {
+		removeBackground,
+		isLoading,
+		imageUrl,
+		error,
+		progress,
+		isClientSideAvailable
+	} = useRemoveBackground({ preferClientSide: useClientSide });
 
 	const onClose = () => {
 		onChangeActiveTool("select");
 	};
-	const onClick = () => {
+	const onClick = async () => {
 		/// TODO: Block with paywall if no credits left
-		mutation.mutate(
-			{
-				image: imageSrc!,
-			},
-			{
-				onSuccess: ({ data }) => {
-					editor?.addImage(data);
-				},
-			},
-		);
+		if (!imageSrc) return;
+
+		await removeBackground(imageSrc);
+
+		// Add the image to the editor when processing is complete
+		if (imageUrl) {
+			editor?.addImage(imageUrl);
+		}
+	};
+
+	const toggleProcessingMode = () => {
+		setUseClientSide(prev => !prev);
 	};
 
 	return (
@@ -75,16 +85,41 @@ export const RemoveBgSidebar = ({
 						>
 							<Image src={imageSrc} fill alt="Image" className="object-cover" />
 						</div>
+						{isClientSideAvailable && (
+							<div className="flex items-center justify-between mb-2 text-sm">
+								<span className="text-muted-foreground">Processing mode:</span>
+								<button
+									onClick={toggleProcessingMode}
+									className="flex items-center text-xs font-medium"
+									disabled={isLoading}
+								>
+									{useClientSide ?
+										<>Browser-based <ToggleRight className="ml-2 h-4 w-4 text-primary" /></> :
+										<>Server-based <ToggleLeft className="ml-2 h-4 w-4" /></>
+									}
+								</button>
+							</div>
+						)}
+
+						{error && (
+							<div className="p-2 bg-red-50 text-red-700 rounded-md text-xs mb-2">
+								{error}
+							</div>
+						)}
+
 						<Button
 							onClick={onClick}
 							className={cn(
 								"w-full",
-								mutation.isPending && "cursor-not-allowed",
+								isLoading && "cursor-not-allowed",
 							)}
-							disabled={mutation.isPending}
+							disabled={isLoading}
 						>
-							{mutation.isPending ? (
-								<Loader className="animate-spin text-muted-foreground" />
+							{isLoading ? (
+								<>
+									<Loader className="mr-2 animate-spin text-muted-foreground" />
+									{progress}
+								</>
 							) : (
 								"Remove Background"
 							)}
