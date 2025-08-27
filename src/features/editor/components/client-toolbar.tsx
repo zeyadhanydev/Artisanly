@@ -7,6 +7,7 @@ import {
 	ArrowDown,
 	ArrowUp,
 	ChevronDown,
+	SquareSplitHorizontal,
 	TrashIcon,
 } from "lucide-react";
 import type React from "react";
@@ -366,6 +367,20 @@ export const ClientToolbar = ({
 							className={cn(activeTool === "filter" && "bg-gray-100")}
 						>
 							<TbColorFilter className="size-4" />
+						</Button>
+					</Hint>
+				</div>
+			)}
+			{isImage && (
+				<div className="flex justify-center items-center h-full">
+					<Hint label="Remove background" side="bottom" sideOffset={5}>
+						<Button
+							onClick={() => onChangeActiveTool("remove-bg")}
+							size={"icon"}
+							variant={"ghost"}
+							className={cn(activeTool === "remove-bg" && "bg-gray-100")}
+						>
+							<SquareSplitHorizontal className="size-4" />
 						</Button>
 					</Hint>
 				</div>

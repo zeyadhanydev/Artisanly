@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useGenerateImage } from "@/features/ai/api/use-generate-image";
 import { ToolSidebarHeader } from "@/features/editor/components/tool-sidebar-header";
@@ -21,14 +22,18 @@ export const AiSidebar = ({
 	onChangeActiveTool,
 }: AiSidebarProps) => {
 	const [value, setValue] = useState("");
+	const [aiModel, setAiModel] = useState('google')
 	const mutation = useGenerateImage();
+
 	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		// TODO: Block with paywall if no credits left
 		console.log(value)
+		console.log(aiModel);
 		mutation.mutate(
 			{
 				prompt: value,
+				model: aiModel
 			},
 			{
 				onSuccess: ({ data }) => {
@@ -56,6 +61,16 @@ export const AiSidebar = ({
 
 			<ScrollArea>
 				<form onSubmit={onSubmit} className="p-4 space-y-6">
+				<Select value={aiModel} onValueChange={setAiModel}>
+				<SelectTrigger className="w-[180px]">
+				<SelectValue placeholder="AI Provider" />
+				</SelectTrigger>
+				<SelectContent>
+						<SelectItem value="google" key={'google'}>Google</SelectItem>
+						<SelectItem value="huggingface" key={'huggingface'}>Hugging Face</SelectItem>
+					<SelectItem value="artisanly" key={'artisanly'}>Artisanly</SelectItem>
+				</SelectContent>
+				</Select>
 					<Textarea
 						placeholder="Describe the image you want to generate..."
 						value={value}

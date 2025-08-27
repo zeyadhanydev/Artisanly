@@ -28,7 +28,6 @@ export const ImageSidebar = ({
 		onChangeActiveTool("select");
 	}, [onChangeActiveTool]);
 	const { data, isLoading, isError } = useGetImages();
-	console.log(data);
 	return (
 		<aside
 			className={cn(
