@@ -7,6 +7,7 @@ import {
 	ArrowDown,
 	ArrowUp,
 	ChevronDown,
+	CopyIcon,
 	SquareSplitHorizontal,
 	TrashIcon,
 } from "lucide-react";
@@ -433,6 +434,13 @@ export const ClientToolbar = ({
 			<ToolbarButton label="Delete" onClick={() => editor.delete()}>
 				<TrashIcon className="size-4" />
 			</ToolbarButton>
+			<ToolbarButton label="Duplicate" onClick={() => {
+			 editor.onCopy()
+				editor.onPaste()
+			}}>
+				<CopyIcon className="size-4" />
+			</ToolbarButton>
+
 		</div>
 	);
 };

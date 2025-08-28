@@ -162,6 +162,8 @@ export type buildEditorProps = {
 	strokeDashArray: number[];
 	setStrokeDashArray: (value: number[]) => void;
   setFontFamily: (value: string) => void;
+  copy: () => void;
+  paste: () => void;
 };
 
 
@@ -207,6 +209,8 @@ export interface Editor {
   delete: () => void;
   addImage: (value: string) => void;
   changeImageFilter: (value: string) => void;
+  onCopy: () => void;
+  onPaste: () => void;
 }
 
 export interface EditorHookProps {
