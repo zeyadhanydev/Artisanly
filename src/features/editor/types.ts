@@ -3,51 +3,50 @@ import type { ITextboxOptions } from "fabric/fabric-impl";
 import * as material from "material-colors";
 
 export const filters = [
-  "none",
-  "polaroid",
-  "sepia",
-  "kodachrome",
-  "contrast",
-  "brightness",
-  "brownie",
-  "technicolor",
-  "pixelate",
-  "invert",
-  "blur",
-  'grayscale',
-  "sharpen",
-  "emboss",
-  "removecolor",
-  "blackwhite",
-  "vibrance",
-  "blendcolor",
-  "huerotate",
-  "resize",
-  "gamma",
-  'saturation'
-]
-
+	"none",
+	"polaroid",
+	"sepia",
+	"kodachrome",
+	"contrast",
+	"brightness",
+	"brownie",
+	"technicolor",
+	"pixelate",
+	"invert",
+	"blur",
+	"grayscale",
+	"sharpen",
+	"emboss",
+	"removecolor",
+	"blackwhite",
+	"vibrance",
+	"blendcolor",
+	"huerotate",
+	"resize",
+	"gamma",
+	"saturation",
+];
 
 export const fonts = [
-  'Arial',
-  'Arial Black',
-  'Verdana',
-  'Helvetica',
-  'Tahoma',
-  'Trebuchet MS',
-  'Times New Roman',
-  'Georgia',
-  'Garamond',
-  'Courier New',
-  'Brush Script MT',
-  'Palatino',
-  'Bookman',
-  'Comic Sans MS',
-  'Impact',
-  'Lucida Sans Unicode',
-  'Geneva',
-  "Lucida Console"
-]
+	"Arial",
+	"Arial Black",
+	"Verdana",
+	"Helvetica",
+	"Tahoma",
+	"Trebuchet MS",
+	"Times New Roman",
+	"Georgia",
+	"Garamond",
+	"Courier New",
+	"Brush Script MT",
+	"Palatino",
+	"Bookman",
+	"Comic Sans MS",
+	"Impact",
+	"Lucida Sans Unicode",
+	"Geneva",
+	"Lucida Console",
+];
 
 export const selectionDependentTools = [
 	"fill",
@@ -154,20 +153,23 @@ export type buildEditorProps = {
 	fillColor: string;
 	strokeColor: string;
 	strokeWidth: number;
-  fontFamily: string;
+	fontFamily: string;
 	setFillColor: (value: string) => void;
 	setStrokeColor: (value: string) => void;
 	setStrokeWidth: (value: number) => void;
 	selectedObjects: fabric.Object[];
 	strokeDashArray: number[];
 	setStrokeDashArray: (value: number[]) => void;
-  setFontFamily: (value: string) => void;
-  copy: () => void;
-  paste: () => void;
+	setFontFamily: (value: string) => void;
+	copy: () => void;
+	paste: () => void;
+	autoZoom: () => void;
 };
 
-
 export interface Editor {
+	autoZoom: () => void;
+	zoomIn: () => void;
+	zoomOut: () => void;
 	addCircle: () => void;
 	addSoftRectangle: () => void;
 	addRectangle: () => void;
@@ -178,8 +180,8 @@ export interface Editor {
 	changeStrokeColor: (value: string) => void;
 	changeStrokeWidth: (value: number) => void;
 	changeStrokeDashArray: (value: number[]) => void;
-	strokeColor: string;
-	strokeWidth: number;
+	// strokeColor: string;
+	// strokeWidth: number;
 	canvas: fabric.Canvas;
 
 	changeOpacity: (value: number) => void;
@@ -192,25 +194,30 @@ export interface Editor {
 	bringForward: () => void;
 	sendBackwards: () => void;
 	addText: (value: string, options?: ITextboxOptions) => void;
-  changeFontFamily: (value: string) => void
-  getActiveFontFamily: () => string;
-  getActiveFontWeight: () => number;
-  changeFontWeight: (value: number) => void
-  changeFontStyle: (value: string) => void
-  getActiveFontStyle: () => string;
-  changeFontLinethrough: (value: boolean) => void
-  getActiveFontLinethrough: () => boolean;
-  changeFontUnderline: (value: boolean) => void
-  getActiveFontUnderline: () => boolean;
-  changeTextAlign: (value: ITextboxOptions['textAlign']) => void
-  getActiveTextAlign: () => string;
-  changeFontSize: (value: number) => void
-  getActiveFontSize: () => number;
-  delete: () => void;
-  addImage: (value: string) => void;
-  changeImageFilter: (value: string) => void;
-  onCopy: () => void;
-  onPaste: () => void;
+	changeFontFamily: (value: string) => void;
+	getActiveFontFamily: () => string;
+	getActiveFontWeight: () => number;
+	changeFontWeight: (value: number) => void;
+	changeFontStyle: (value: string) => void;
+	getActiveFontStyle: () => string;
+	changeFontLinethrough: (value: boolean) => void;
+	getActiveFontLinethrough: () => boolean;
+	changeFontUnderline: (value: boolean) => void;
+	getActiveFontUnderline: () => boolean;
+	changeTextAlign: (value: ITextboxOptions["textAlign"]) => void;
+	getActiveTextAlign: () => string;
+	changeFontSize: (value: number) => void;
+	getActiveFontSize: () => number;
+	delete: () => void;
+	addImage: (value: string) => void;
+	changeImageFilter: (value: string) => void;
+	onCopy: () => void;
+	onPaste: () => void;
+	enableDrawingMode: () => void;
+	disableDrawingMode: () => void;
+	changeSize: (value: { width: number; height: number }) => void;
+	changeBackground: (value: string) => void;
+	getWorkspace: () => fabric.Object | undefined;
 }
 
 export interface EditorHookProps {

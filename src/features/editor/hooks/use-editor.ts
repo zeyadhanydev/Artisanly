@@ -1,6 +1,7 @@
 import { fabric } from "fabric";
 import type { ITextboxOptions } from "fabric/fabric-impl";
 import { useCallback, useMemo, useState } from "react";
+import { get } from "unsplash-js/dist/methods/users";
 import { useAutoResize } from "@/features/editor/hooks/use-auto-resize";
 import { useCanvasEvents } from "@/features/editor/hooks/use-canvas-events";
 import {
@@ -22,6 +23,7 @@ import {
 } from "@/features/editor/types";
 import { createFilter, isTextType } from "@/features/editor/utils";
 import { useClipboard } from "./use-clipboard";
+import { useHistory } from "./use-history";
 
 const buildEditor = ({
 	canvas,
@@ -36,12 +38,14 @@ const buildEditor = ({
 	strokeDashArray,
 	fontFamily,
 	setFontFamily,
-	copy, paste
+	copy,
+	paste,
+	autoZoom,
 }: buildEditorProps): Editor => {
 	const getWorkspace = () => {
-		return canvas
-			.getObjects()
-			.find((obj) => obj.name === "clip") as fabric.Rect;
+		return canvas.getObjects().find((obj) => obj.name === "clip") as
+			| fabric.Object
+			| undefined;
 	};
 	const center = (object: fabric.Object) => {
 		const workspace = getWorkspace();
@@ -56,37 +60,85 @@ const buildEditor = ({
 		canvas.setActiveObject(object);
 	};
 	return {
-	onCopy: () => copy(),
-	onPaste: () => paste(),
-	changeImageFilter: (value: string) => {
-	const objects = canvas.getActiveObjects()
-	objects.forEach((object) => {
-	if (object.type === 'image') {
-    const imageObject = object as fabric.Image;
-    const effect = createFilter(value);
-    imageObject.filters = effect ? [effect] : [];
-    imageObject.applyFilters()
-    canvas.renderAll();
-	}
-	})
-	},
-	addImage: (value: string)=> {
-	fabric.Image.fromURL(value, (image) => {
-    const workspace = getWorkspace();
-    image.scaleToWidth(workspace.width || 0)
-    image.scaleToHeight(workspace.height || 0)
-  addToCanvas(image);
-	}, {
-	crossOrigin: 'anonymous'
-	})
-
-	},
-	delete: () => {
-
-	canvas.getActiveObjects().forEach((object) => {canvas.remove(object)})
-      canvas.discardActiveObject();
-      canvas.renderAll();
-	},
+		autoZoom,
+		zoomIn: () => {
+			let zoomRatio = canvas.getZoom();
+			zoomRatio += 0.05;
+			const center = canvas.getCenter();
+			canvas.zoomToPoint(
+				new fabric.Point(center.left, center.top),
+				zoomRatio > 1 ? 1 : zoomRatio,
+			);
+		},
+		zoomOut: () => {
+			let zoomRatio = canvas.getZoom();
+			zoomRatio -= 0.05;
+			const center = canvas.getCenter();
+			canvas.zoomToPoint(
+				new fabric.Point(center.left, center.top),
+				zoomRatio < 0.2 ? 0.2 : zoomRatio,
+			);
+		},
+		getWorkspace,
+		changeSize: (value: { width: number; height: number }) => {
+			const workspace = getWorkspace();
+			workspace?.set(value);
+			autoZoom();
+			// TODO: save
+		},
+		changeBackground: (value: string) => {
+			const workspace = getWorkspace();
+			workspace?.set({
+				fill: value,
+			});
+			canvas.renderAll();
+			// TODO: save
+		},
+		enableDrawingMode: () => {
+			canvas.discardActiveObject();
+			canvas.renderAll();
+			canvas.isDrawingMode = true;
+			canvas.freeDrawingBrush.width = strokeWidth;
+			canvas.freeDrawingBrush.color = strokeColor;
+		},
+		disableDrawingMode: () => {
+			canvas.isDrawingMode = false;
+		},
+		onCopy: () => copy(),
+		onPaste: () => paste(),
+		changeImageFilter: (value: string) => {
+			const objects = canvas.getActiveObjects();
+			objects.forEach((object) => {
+				if (object.type === "image") {
+					const imageObject = object as fabric.Image;
+					const effect = createFilter(value);
+					imageObject.filters = effect ? [effect] : [];
+					imageObject.applyFilters();
+					canvas.renderAll();
+				}
+			});
+		},
+		addImage: (value: string) => {
+			fabric.Image.fromURL(
+				value,
+				(image) => {
+					const workspace = getWorkspace();
+					image.scaleToWidth(workspace?.width || 0);
+					image.scaleToHeight(workspace?.height || 0);
+					addToCanvas(image);
+				},
+				{
+					crossOrigin: "anonymous",
+				},
+			);
+		},
+		delete: () => {
+			canvas.getActiveObjects().forEach((object) => {
+				canvas.remove(object);
+			});
+			canvas.discardActiveObject();
+			canvas.renderAll();
+		},
 		addText: (value, options) => {
 			const object = new fabric.Textbox(value, {
 				...TEXT_OPTIONS,
@@ -123,7 +175,7 @@ const buildEditor = ({
 			});
 			canvas.renderAll();
 			const workspace = getWorkspace();
-			workspace.sendToBack();
+			workspace?.sendToBack();
 			// TODO: Elements could go below workspace overflow
 		},
 		sendBackwards: () => {
@@ -133,7 +185,7 @@ const buildEditor = ({
 			canvas.renderAll();
 
 			const workspace = getWorkspace();
-			workspace.sendToBack();
+			workspace?.sendToBack();
 
 			// TODO: Elements could go below workspace overflow
 		},
@@ -149,6 +201,7 @@ const buildEditor = ({
 			canvas.getActiveObjects().forEach((object) => {
 				object.set({ strokeWidth: value });
 			});
+			canvas.freeDrawingBrush.width = value;
 			canvas.renderAll();
 		},
 		changeStrokeDashArray: (value: number[]) => {
@@ -170,6 +223,8 @@ const buildEditor = ({
 				}
 				object.set({ stroke: value });
 			});
+
+			canvas.freeDrawingBrush.color = value;
 			canvas.renderAll();
 		},
 		changeFontFamily: (value) => {
@@ -371,9 +426,9 @@ const buildEditor = ({
 		getActiveTextAlign: () => {
 			const selectedObject = selectedObjects[0];
 			if (!selectedObject) {
-				return 'left';
+				return "left";
 			}
-			const value = selectedObject.get("textAlign") || 'left';
+			const value = selectedObject.get("textAlign") || "left";
 			// curretly , gradiant & patterns are not supported
 			return value;
 		},
@@ -388,7 +443,7 @@ const buildEditor = ({
 		getActiveFontSize: () => {
 			const selectedObject = selectedObjects[0];
 			if (!selectedObject) {
-				return FONT_SIZE
+				return FONT_SIZE;
 			}
 			const value = selectedObject.get("fontSize") || FONT_SIZE;
 			// curretly , gradiant & patterns are not supported
@@ -417,14 +472,15 @@ export const useEditor = ({ clearSelectionCallback }: EditorHookProps) => {
 	const [strokeDashArray, setStrokeDashArray] =
 		useState<number[]>(STROKE_DASH_ARRAY);
 	const [fontFamily, setFontFamily] = useState<string>(FONT_FAMILY);
-	const {copy, paste} = useClipboard({canvas})
-
-	useAutoResize({
+	const { copy, paste } = useClipboard({ canvas });
+	const { save } = useHistory({ canvas });
+	const { autoZoom } = useAutoResize({
 		canvas,
 		container,
 	});
 
 	useCanvasEvents({
+		save,
 		canvas,
 		setSelectedObjects,
 		clearSelectionCallback,
@@ -446,7 +502,8 @@ export const useEditor = ({ clearSelectionCallback }: EditorHookProps) => {
 				fontFamily,
 				setFontFamily,
 				copy,
-			 paste
+				paste,
+				autoZoom,
 			});
 		return undefined;
 	}, [
@@ -457,7 +514,9 @@ export const useEditor = ({ clearSelectionCallback }: EditorHookProps) => {
 		strokeWidth,
 		selectedObjects,
 		strokeDashArray,
-		copy, paste
+		copy,
+		paste,
+		autoZoom,
 	]);
 
 	const init = useCallback(

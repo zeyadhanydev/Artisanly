@@ -22,6 +22,8 @@ import {
 	type ActiveTool,
 	selectionDependentTools,
 } from "@/features/editor/types";
+import { DrawSidebar } from "./draw-sidebar";
+import { SettingsSidebar } from "./settings-sidebar";
 
 export const Editor = () => {
 	const [activeTool, setActiveTool] = useState<ActiveTool>("select");
@@ -36,16 +38,17 @@ export const Editor = () => {
 
 	const onChangeActiveTool = useCallback(
 		(tool: ActiveTool) => {
-			if (tool === activeTool) return setActiveTool("select");
 			if (tool === "draw") {
-				// TODO: enable draw mode
+				editor?.enableDrawingMode();
 			}
 			if (activeTool === "draw") {
-				// TODO: disable draw mode
+				editor?.disableDrawingMode();
 			}
+			if (tool === activeTool) return setActiveTool("select");
+
 			setActiveTool(tool);
 		},
-		[activeTool],
+		[activeTool, editor],
 	);
 
 	const canvasRef = useRef(null);
@@ -129,6 +132,16 @@ export const Editor = () => {
 					activeTool={activeTool}
 					onChangeActiveTool={onChangeActiveTool}
 				/>
+				<DrawSidebar
+					editor={editor}
+					activeTool={activeTool}
+					onChangeActiveTool={onChangeActiveTool}
+				/>
+				<SettingsSidebar
+					editor={editor}
+					activeTool={activeTool}
+					onChangeActiveTool={onChangeActiveTool}
+				/>
 				<main className="bg-muted flex-1 overflow-auto relative flex flex-col">
 					<Toolbar
 						editor={editor}
@@ -143,7 +156,7 @@ export const Editor = () => {
 						{/* containerRef, canvasRef control the canvas area responsive in the page and centerd in the page */}
 						<canvas ref={canvasRef} />
 					</div>
-					<Footer />
+					<Footer editor={editor} />
 				</main>
 			</div>
 		</div>

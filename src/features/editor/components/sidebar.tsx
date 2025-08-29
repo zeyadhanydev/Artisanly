@@ -63,7 +63,6 @@ export const Sidebar = ({ activeTool, onChangeActiveTool }: SidebarProps) => {
 					isActive={activeTool === "settings"}
 					onClick={() => onChangeActiveTool("settings")}
 				/>
-
 			</ul>
 		</aside>
 	);
