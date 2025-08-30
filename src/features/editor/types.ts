@@ -1,7 +1,16 @@
 import type { fabric } from "fabric";
 import type { ITextboxOptions } from "fabric/fabric-impl";
 import * as material from "material-colors";
-
+export const JSON_KEYS = [
+	"name",
+	"gradientAngle",
+	"selectable",
+	"hasControls",
+	"linkData",
+	"editable",
+	"extensionType",
+	"extension",
+];
 export const filters = [
 	"none",
 	"polaroid",
@@ -149,6 +158,11 @@ export const DIAMOND_OPTIONS = {
 };
 
 export type buildEditorProps = {
+	save: (skip?: boolean) => void;
+	undo: () => void;
+	redo: () => void;
+	canUndo: () => boolean;
+	canRedo: () => boolean;
 	canvas: fabric.Canvas;
 	fillColor: string;
 	strokeColor: string;
@@ -167,6 +181,10 @@ export type buildEditorProps = {
 };
 
 export interface Editor {
+	canUndo: () => boolean;
+	canRedo: () => boolean;
+	onUndo: () => void;
+	onRedo: () => void;
 	autoZoom: () => void;
 	zoomIn: () => void;
 	zoomOut: () => void;
