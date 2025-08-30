@@ -1,5 +1,28 @@
 import { fabric } from "fabric";
 import type { RGBColor } from "react-color";
+import { uuid } from "uuidv4";
+
+export function downloadFile(file: string, type: string) {
+	const anchorElement = document.createElement("a");
+	anchorElement.href = file;
+	anchorElement.download = `${uuid()}.${type}`;
+	document.body.appendChild(anchorElement);
+	anchorElement.click();
+	anchorElement.remove();
+}
+export function transformText(objects: any) {
+	if (!objects) return;
+	objects.forEach((item: any) => {
+		if (item.objects) {
+			transformText(item.objects);
+		} else {
+			if (item.type === "text") {
+				item.type = "textbox";
+			}
+		}
+	});
+}
+
 export function isTextType(type: string | undefined) {
 	return type === "text" || type === "i-text" || type === "textbox";
 }
@@ -12,17 +35,17 @@ export function rgbaObjectToString(rgba: RGBColor | "transparent") {
 	return `rgba(${rgba.r}, ${rgba.g}, ${rgba.b}, ${alpha})`;
 }
 export const createFilter = (value: string) => {
-  let effect;
+	let effect;
 	switch (value) {
 		case "polaroid":
-		//	@ts-expect-error -- types are missing
+			//	@ts-expect-error -- types are missing
 			effect = new fabric.Image.filters.Polaroid();
 			break;
 		case "sepia":
 			effect = new fabric.Image.filters.Sepia();
 			break;
 		case "kodachrome":
-		//	@ts-expect-error -- types are missing
+			//	@ts-expect-error -- types are missing
 			effect = new fabric.Image.filters.Kodachrome();
 			break;
 		case "contrast":
@@ -32,11 +55,11 @@ export const createFilter = (value: string) => {
 			effect = new fabric.Image.filters.Brightness({ brightness: 0.8 });
 			break;
 		case "brownie":
-		//	@ts-expect-error -- types are missing
+			//	@ts-expect-error -- types are missing
 			effect = new fabric.Image.filters.Vintage();
 			break;
 		case "technicolor":
-		//	@ts-expect-error -- types are missing
+			//	@ts-expect-error -- types are missing
 			effect = new fabric.Image.filters.Technicolor();
 			break;
 		case "pixelate":
@@ -59,7 +82,7 @@ export const createFilter = (value: string) => {
 			});
 			break;
 		case "removecolor":
-		//	@ts-expect-error -- types are missing
+			//	@ts-expect-error -- types are missing
 			effect = new fabric.Image.filters.RemoveColor({
 				threshold: 0.2,
 				distance: 0.5,
@@ -69,43 +92,43 @@ export const createFilter = (value: string) => {
 			//	@ts-expect-error -- types are missing
 			effect = new fabric.Image.filters.BlackWhite();
 			break;
-			case "vibrance":
-				//	@ts-expect-error -- types are missing
-				effect = new fabric.Image.filters.Vibrance({
-				vibrance: 1
-				});
-				break;
-    case "grayscale":
-      effect = new fabric.Image.filters.Grayscale();
-      break;
-      case "saturation":
-        effect = new fabric.Image.filters.Saturation({
-          saturation: 0.7
-        });
-        break;
-				case "blendcolor":
-					effect = new fabric.Image.filters.BlendColor({
-					color: '#00ff00',
-					mode: 'multiply'
-					});
-					break;
-					case "huerotate":
-						effect = new fabric.Image.filters.HueRotation({
-						rotation: 0.5,
-						});
-						break;
-						case "resize":
-							effect = new fabric.Image.filters.Resize();
-							break;
-							case "gamma":
-							//	@ts-expect-error -- types are missing
-								effect = new fabric.Image.filters.Gamma({
-								gamma: [1, 0.5,2.1]
-								});
-								break;
-    default:
-      effect = null;
-      return;
+		case "vibrance":
+			//	@ts-expect-error -- types are missing
+			effect = new fabric.Image.filters.Vibrance({
+				vibrance: 1,
+			});
+			break;
+		case "grayscale":
+			effect = new fabric.Image.filters.Grayscale();
+			break;
+		case "saturation":
+			effect = new fabric.Image.filters.Saturation({
+				saturation: 0.7,
+			});
+			break;
+		case "blendcolor":
+			effect = new fabric.Image.filters.BlendColor({
+				color: "#00ff00",
+				mode: "multiply",
+			});
+			break;
+		case "huerotate":
+			effect = new fabric.Image.filters.HueRotation({
+				rotation: 0.5,
+			});
+			break;
+		case "resize":
+			effect = new fabric.Image.filters.Resize();
+			break;
+		case "gamma":
+			//	@ts-expect-error -- types are missing
+			effect = new fabric.Image.filters.Gamma({
+				gamma: [1, 0.5, 2.1],
+			});
+			break;
+		default:
+			effect = null;
+			return;
 	}
 	return effect;
 };

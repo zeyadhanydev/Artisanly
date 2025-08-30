@@ -22,10 +22,16 @@ import {
 	TEXT_OPTIONS,
 	TRIANGLE_OPTIONS,
 } from "@/features/editor/types";
-import { createFilter, isTextType } from "@/features/editor/utils";
+import {
+	createFilter,
+	downloadFile,
+	isTextType,
+	transformText,
+} from "@/features/editor/utils";
 import { useClipboard } from "./use-clipboard";
 import { useHistory } from "./use-history";
 import { useHotkeys } from "./use-hotkeys";
+import { useWindowEvents } from "./use-window-events";
 
 const buildEditor = ({
 	canvas,
@@ -50,6 +56,62 @@ const buildEditor = ({
 	redo,
 	canUndo,
 }: buildEditorProps): Editor => {
+	const generateSaveOptions = () => {
+		const { width, height, left, top } = getWorkspace() as fabric.Rect;
+		return {
+			name: "Image",
+			format: "png",
+			quality: 1,
+			width,
+			height,
+			left,
+			top,
+		};
+	};
+	const savePng = () => {
+		const options = generateSaveOptions();
+		canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+		const dataUrl = canvas.toDataURL(options);
+		downloadFile(dataUrl, "png");
+		autoZoom();
+	};
+
+	const saveSvg = () => {
+		const options = generateSaveOptions();
+		canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+		const dataUrl = canvas.toDataURL(options);
+		downloadFile(dataUrl, "svg");
+		autoZoom();
+	};
+
+	const saveJpg = () => {
+		const options = generateSaveOptions();
+		canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+		const dataUrl = canvas.toDataURL(options);
+		downloadFile(dataUrl, "jpg");
+		autoZoom();
+	};
+
+	const saveJson = async () => {
+		const dataUrl = canvas.toJSON(JSON_KEYS);
+
+		await transformText(dataUrl.objects);
+		// encodeURIComponent` is a JavaScript function that encodes a string to be used in a URI (Uniform Resource Identifier), also known as a URL. It escapes special characters, with the exception of: `- _ . ! ~ * ' ( )`.
+		// This is useful when you need to
+		// pass a string as a parameter in a URL.
+		// For example, if you have a search query
+		// that might contain special characters like `&` or `/`,
+		// you would use `encodeURIComponent` to prevent them from
+		// being interpreted as part of the URL structure.
+		const fileString = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(dataUrl, null, "\t"))}`;
+		downloadFile(fileString, "json");
+	};
+	const loadJson = (json: string) => {
+		const data = JSON.parse(json);
+		canvas.loadFromJSON(data, () => {
+			autoZoom();
+		});
+	};
 	const getWorkspace = () => {
 		return canvas.getObjects().find((obj) => obj.name === "clip") as
 			| fabric.Object
@@ -68,6 +130,11 @@ const buildEditor = ({
 		canvas.setActiveObject(object);
 	};
 	return {
+		savePng,
+		saveJpg,
+		saveSvg,
+		saveJson,
+		loadJson,
 		autoZoom,
 		canUndo,
 		canRedo,
@@ -493,7 +560,7 @@ export const useEditor = ({ clearSelectionCallback }: EditorHookProps) => {
 		canvas,
 		container,
 	});
-
+	useWindowEvents();
 	useCanvasEvents({
 		save,
 		canvas,
