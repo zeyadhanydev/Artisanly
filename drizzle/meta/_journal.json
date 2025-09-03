@@ -8,6 +8,13 @@
       "when": 1756613050630,
       "tag": "0000_redundant_boomerang",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1756903210478,
+      "tag": "0001_thick_tarot",
+      "breakpoints": true
     }
   ]
 }
