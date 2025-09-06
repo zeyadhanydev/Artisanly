@@ -22,10 +22,14 @@ import {
 	type ActiveTool,
 	selectionDependentTools,
 } from "@/features/editor/types";
+import type { ResponseType } from "@/features/projects/api/use-get-project";
 import { DrawSidebar } from "./draw-sidebar";
 import { SettingsSidebar } from "./settings-sidebar";
 
-export const Editor = () => {
+interface EditorProps {
+	initalData: ResponseType["data"];
+}
+export const Editor = ({ initalData }: EditorProps) => {
 	const [activeTool, setActiveTool] = useState<ActiveTool>("select");
 	const onClearSelection = useCallback(() => {
 		if (selectionDependentTools.includes(activeTool)) {

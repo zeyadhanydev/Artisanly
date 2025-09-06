@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { SessionProvider } from "next-auth/react";
 import { Toaster } from "sonner";
+import { auth } from "@/auth";
 import { Providers } from "@/components/providers";
 
 const geistSans = Geist({
@@ -17,21 +19,25 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
 	title: "Artisan AI",
 	description: "Canva with AI image generation",
+	icons: "logo.svg",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
+	const session = await auth();
 	return (
-		<html lang="en" suppressHydrationWarning>
-			<body
-				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-			>
-				<Toaster />
-				<Providers>{children}</Providers>
-			</body>
-		</html>
+		<SessionProvider session={session}>
+			<html lang="en" suppressHydrationWarning>
+				<body
+					className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+				>
+					<Toaster />
+					<Providers>{children}</Providers>
+				</body>
+			</html>
+		</SessionProvider>
 	);
 }

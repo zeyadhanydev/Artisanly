@@ -15,6 +15,13 @@
       "when": 1756903210478,
       "tag": "0001_thick_tarot",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1757057220731,
+      "tag": "0002_thankful_harrier",
+      "breakpoints": true
     }
   ]
 }

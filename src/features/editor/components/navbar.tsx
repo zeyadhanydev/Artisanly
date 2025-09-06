@@ -11,6 +11,7 @@ import { BsCloudCheck } from "react-icons/bs";
 import { CiFileOn } from "react-icons/ci";
 import { useFilePicker } from "use-file-picker";
 import { Hint } from "@/components/hint";
+import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -19,6 +20,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
+import { UserButton } from "@/features/auth/components/user-button";
 import { Logo } from "@/features/editor/components/logo";
 import type { ActiveTool, Editor } from "@/features/editor/types";
 import { cn } from "@/lib/utils";
@@ -184,6 +186,7 @@ export const Navbar = ({
 						</DropdownMenuContent>
 					</DropdownMenu>
 					{/* add user icon button  */}
+					<UserButton />
 				</div>
 			</div>
 		</div>

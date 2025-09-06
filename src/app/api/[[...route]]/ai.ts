@@ -4,8 +4,9 @@ import { zValidator } from '@hono/zod-validator'
 import { hf } from "@/lib/huggingface";
 import { GoogleGenAI, Modality } from "@google/genai";
 import axios from "axios";
+import { verifyAuth } from "@hono/auth-js";
 const app = new Hono()
-  .post('/remove-bg', zValidator('json', z.object({
+  .post('/remove-bg',verifyAuth(), zValidator('json', z.object({
     image: z.string()
   })), async (c) => {
     const { image } = c.req.valid('json');
@@ -59,6 +60,7 @@ console.log(image)
   })
   .post('/generate-image',
   // add verification
+   verifyAuth(),
   zValidator('json',
     z.object({
     prompt: z.string(),
